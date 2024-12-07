@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Presale Test</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/layui/css/layui.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo layui-hide-xs layui-bg-black">Presale Test</div>
+
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item" lay-unselect>
+
+                    <button type="button" class="layui-btn layui-btn-radius" id="connWallet">链接钱包</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="layui-body">
+            <!-- 内容主体区域 -->
+            <div style="padding: 15px;">
+
+                <fieldset class="layui-elem-field">
+                    <legend>设置</legend>
+                    <div class="layui-field-box">
+                        <blockquote class="layui-elem-quote layui-text">
+                            <input type="text" name="" placeholder="合约地址" class="layui-input" id="presaleAddress">
+                            <button type="button" class="layui-btn layui-btn-warm layui-btn-radius"
+                                id="setPresaleAddress">设置</button>
+                        </blockquote>
+                    </div>
+                </fieldset>
+                <fieldset class="layui-elem-field">
+                    <legend>池子信息</legend>
+                    <div class="layui-field-box">
+                        <blockquote class="layui-elem-quote layui-text" id="totalValue">Total: 0 ETH
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="presaleLimitValue">硬顶上限: 0 ETH
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="completionValue">完成度:
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="tokenTotalValue">TOKEN 总量: 0 CBT
+                        </blockquote>
+                    </div>
+                </fieldset>
+                <fieldset class="layui-elem-field">
+                    <legend>个人信息</legend>
+                    <div class="layui-field-box">
+                        <blockquote class="layui-elem-quote layui-text" id="balancesValue">参与额度: 0 ETH
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="claimTokenValue">分配token: 0
+                        </blockquote>
+                    </div>
+                </fieldset>
+
+                <fieldset class="layui-elem-field">
+                    <legend>操作</legend>
+                    <div class="layui-field-box">
+                        <blockquote class="layui-elem-quote layui-text">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">数量</label>
+                                <div class="layui-input-inline" style="width: 100px;">
+                                    <input type="number" name="price_min" placeholder="" autocomplete="off"
+                                        class="layui-input" min="0" step="1" lay-affix="number" id="numberBuy">
+                                </div>
+
+                            </div>
+
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn-radius"
+                                id="buyBtn">BUY</button>
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn-radius"
+                                id="claimBtn">CLAIM</button>
+                        </blockquote>
+                    </div>
+                </fieldset>
+                <fieldset class="layui-elem-field">
+                    <legend>最近信息</legend>
+                    <div class="layui-field-box">
+                        <blockquote class="layui-elem-quote layui-text" id="luckyArrayText">幸运者
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="buyArrayText">参与者
+                        </blockquote>
+                    </div>
+                </fieldset>
+
+                <fieldset class="layui-elem-field">
+                    <legend>开奖信息</legend>
+                    <div class="layui-field-box">
+                        <blockquote class="layui-elem-quote layui-text" id="firstPrizeAddress">一等奖
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="secondPrizeAddress">二等奖
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="thirdPrizeAddress">三等奖
+                        </blockquote>
+                        <blockquote class="layui-elem-quote layui-text" id="lastPrizeAddress">抽奖人
+                        </blockquote>
+                    </div>
+                </fieldset>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/layui/layui.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/web3.min.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/extensions.js?v=2"></script>
+    <script>
+        //JS 
+        layui.use(['element', 'layer', 'util'], function () {
+            var element = layui.element;
+            var layer = layui.layer;
+            var util = layui.util;
+            var $ = layui.$;
+
+        });
+
+
+        $(function () {
+            $('#connWallet').click(function () {
+                init();
+            });
+
+            $('#buyBtn').click(function () {
+                buy();
+            });
+
+            $('#claimBtn').click(function () {
+                claim();
+            });
+            $('#setPresaleAddress').click(function () {
+                set();
+            });
+
+        });
+
+        async function set() {
+            var address = $('#presaleAddress').val();
+            ContractAddress.presale = address;
+        }
+
+        async function init() {
+
+            if (isMetamask()) {
+                openWallet();
+                EthereumInit();
+
+                if (await isChainID() == false) {
+
+                    layer.alert('Sorry, this chain is not currently supported.');
+
+                    //alert('Sorry, this chain is not currently supported.');
+                    return;
+                }
+
+                setInterval(function () {
+                    updateData();
+                }, 5000);
+
+
+            } else {
+                layer.alert('Wallet plugin not found!');
+            }
+
+        };
+
+        async function updateData() {
+            await updatePoolInfo();
+
+            await getLastPageDesc();
+
+            await getKJInfo();
+        }
+
+        async function isMetamask() {
+            if (IsMetamaskAvailable()) {
+                web3 = new Web3(window.ethereum);
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        async function openWallet() {
+
+            await enableEthereum();
+
+            await updatePoolInfo();
+
+            await getLastPageDesc();
+
+            await getKJInfo();
+        }
+
+        async function updatePoolInfo() {
+            var limitAmount = await getPresaleLimit();
+            $('#presaleLimitValue').text("硬顶上限：" + limitAmount + " ETH");
+
+            var totalAmount = await getTotal();
+            $('#totalValue').text("Total: " + totalAmount + " ETH");
+
+            $('#completionValue').html("完成度: " + totalAmount / limitAmount * 100 + " % <br/>");
+
+            var tokenTotalAmount = await getTokenTotal();
+            $('#tokenTotalValue').text("TOKEN 总量: " + tokenTotalAmount + " CBT");
+
+
+            var userInfo = await queryUserInfo();
+
+            $('#balancesValue').text("参与额度: " + web3.utils.fromWei(userInfo.balances) + " ETH");
+            var getTokenAmountValue = await getTokenAmount();
+            $('#claimTokenValue').text("可分配token: " + getTokenAmountValue + " CBT");
+
+        }
+
+        async function getLastPageDesc() {
+            var luckyArray = await getPageLuckyDesc(10);
+            var buyArray = await getPageBuyDesc(10);
+
+            var luckyHtml = '幸运者<br/>';
+            for (var i = 0; i < luckyArray.length; i++) {
+                luckyHtml += luckyArray[i] + "<br/>";
+            }
+            $('#luckyArrayText').html(luckyHtml);
+
+            var buyHtml = '参与者<br/>';
+            for (var i = 0; i < buyArray.length; i++) {
+                buyHtml += buyArray[i] + "<br/>";
+            }
+            $('#buyArrayText').html(buyHtml);
+        }
+
+        async function getKJInfo() {
+            var firstPrizeAddress = await getFirstPrizeAddress();
+            var secondPrizeAddress = await getSecondPrizeAddress();
+            var thirdPrizeAddress = await getThirdPrizeAddress();
+            var lastPrizeAddress = await getLastPrizeAddress();
+
+            $('#firstPrizeAddress').html("一等奖 " + firstPrizeAddress);
+            $('#secondPrizeAddress').html("二等奖 " + secondPrizeAddress);
+            $('#thirdPrizeAddress').html("三等奖 " + thirdPrizeAddress);
+            $('#lastPrizeAddress').html("抽奖人 " + lastPrizeAddress);
+        }
+
+
+        async function buy() {
+            var number = $('#numberBuy').val();
+
+            var info = await buyToken(number);
+
+            layer.alert(info.msg);
+
+
+        }
+
+        async function claim() {
+
+            var info = await claimToken();
+
+            layer.alert(info.msg);
+
+
+        }
+
+        async function EthereumInit() {
+            ethereum.on("accountsChanged", function (accounts) {
+                let account = "";
+                if (accounts[0] !== undefined) {
+                    account = accounts[0];
+                }
+                _accountsChanged(account);
+            });
+            ethereum.on("chainChanged", function (chainId) {
+                _chainChanged(chainId);
+            });
+        }
+
+        async function _accountsChanged(account) {
+            await openWallet();
+
+        }
+
+        async function _chainChanged(chainId) {
+            if (await isChainID() == false) {
+                layer.alert('Sorry, this chain is not currently supported.');
+                return;
+            }
+            await openWallet();
+        }
+
+        async function enableEthereum() {
+            await EnableEthereum();
+
+            var _address = await GetSelectedAddress();
+
+            $('#connWallet').text(_address.substring(0, 6) + "..." + (_address.substring(36, 42)));
+        }
+
+
+        async function isChainID() {
+
+            var chainid = await web3.eth.getChainId();
+
+            if (chainIDList.indexOf(chainid) == -1) {
+                return false;
+            }
+
+            var chainInfo = chainList[chainid];
+            ContractAddress.presale = chainInfo.presale;
+
+            return true;
+        }
+
+
+    </script>
+</body>
+
+</html>
