@@ -155,12 +155,10 @@ async function buyToken(_number){
     try {
         _gasLimit = await web3.eth.estimateGas(transactionParameters);
     } catch (e) {
-        var msgStr = e.message.substring(25);
-        var msg = JSON.parse(msgStr);
 
         return {
             state: false,
-            msg: msg.message
+            msg: e.message
         };
     }
     transactionParameters.gasLimit = web3.utils.toHex(_gasLimit);
