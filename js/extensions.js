@@ -79,6 +79,12 @@ async function getTokenTotal() {
     return web3.utils.fromWei(nums);
 }
 
+async function getClaimTotal(){
+    var presaleContract = new web3.eth.Contract(Presale_ABI, ContractAddress.presale);
+    var nums = await presaleContract.methods.claimTotal().call();
+    return web3.utils.fromWei(nums);
+}
+
 async function queryUserInfo() {
     var presaleContract = new web3.eth.Contract(Presale_ABI, ContractAddress.presale);
     var address = await GetSelectedAddress();
@@ -155,7 +161,6 @@ async function buyToken(_number){
     try {
         _gasLimit = await web3.eth.estimateGas(transactionParameters);
     } catch (e) {
-
         return {
             state: false,
             msg: e.message
