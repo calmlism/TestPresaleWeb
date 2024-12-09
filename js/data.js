@@ -1,13 +1,13 @@
 
 var ContractAddress = {
-	presale: "0x6f724AcCA48F5F9fD4141781d4eee272B4992A1A",
+	presale: "0x6414A25eBe3433c58CbfC982E803c37c499AB2f8",
 };
 
 var chainIDList = [11155111];
 
 var chainList = {
 	11155111: {
-		presale: "0x6f724AcCA48F5F9fD4141781d4eee272B4992A1A"
+		presale: "0x6414A25eBe3433c58CbfC982E803c37c499AB2f8"
 	}
 };
 
